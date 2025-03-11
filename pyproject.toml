@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "yolo-gradio"
+version = "0.1.0"
+description = "YOLO Inference App using different sources"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+ultralytics = "^8.3.53"
+pillow = "^10.4.0"
+gradio = "^5.9.1"
+opencv-python = "^4.10.0.84"
+
+# Optional dependencies for webscockets/h264 processing
+av = { version = "^14.0.1", optional = true }
+
+[tool.poetry.extras]
+ws = ["av"]
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+isort = "^5.13.2"
+mypy = "^1.14.0"
+pylint = "^3.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

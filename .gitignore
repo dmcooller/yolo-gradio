@@ -1,0 +1,17 @@
+__pycache__/
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+env/
+venv/
+.venv/
+*.db
+*.sqlite3
+.env
+.env-dev
+.coverage
+*.pt
+flagged/
+output/
