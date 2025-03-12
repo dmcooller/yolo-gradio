@@ -103,47 +103,59 @@ def vid_inf(
 
     model = YOLO(get_model_path(model_name_manual or model_n))
     device = get_device_type(device)
-    
+
     # Initialize frame counter and timing
     frame_count = 0
     fps_counter = 0.0
     exec_start_time = time.time()
     fps_start_time = time.time()
-    while cap.isOpened():
-        ret, frame_y = cap.read()
-        if not ret:
-            break
 
-        results = model.predict(
-            device=device,
-            source=frame_y,
-            conf=conf_threshold,
-            iou=iou_threshold,
-            show_labels=True,
-            show_conf=True,
-            imgsz=imgsz,
-            verbose=False,
-        )
+    # Create a placeholder for the last frame
+    last_frame = None
 
-        res = results[0]
-        im_array = res.plot()
-        out.write(im_array) # save the frame to the output video
+    try:
+        while cap.isOpened():
+            ret, frame_y = cap.read()
+            if not ret:
+                break
 
-        # Update FPS every second
-        frame_count += 1
-        if frame_count % 10 == 0:
-            end_time = time.time()
-            fps_counter = 10 / (end_time - fps_start_time)
-            fps_start_time = time.time()
+            results = model.predict(
+                device=device,
+                source=frame_y,
+                conf=conf_threshold,
+                iou=iou_threshold,
+                show_labels=True,
+                show_conf=True,
+                imgsz=imgsz,
+                verbose=False,
+            )
 
-        yield Image.fromarray(im_array[..., ::-1]), round(fps_counter, 2), None, None
+            res = results[0]
+            im_array = res.plot()
+            out.write(im_array) # save the frame to the output video
 
-    end_time = time.time()
-    execution_time = end_time - exec_start_time
-    cap.release()
-    out.release()
-    cv2.destroyAllWindows()
-    yield None, round(fps_counter, 2), round(execution_time, 4), output_video
+            # Store the last frame to show after processing is complete
+            last_frame = Image.fromarray(im_array[..., ::-1])
+
+            # Update FPS every second
+            frame_count += 1
+            if frame_count % 10 == 0:
+                end_time = time.time()
+                fps_counter = 10 / (end_time - fps_start_time)
+                fps_start_time = time.time()
+
+            # During processing, yield updates
+            yield last_frame, round(fps_counter, 2), None, None
+    finally:
+        # Ensure resources are released even if an error occurs
+        end_time = time.time()
+        execution_time = end_time - exec_start_time
+        cap.release()
+        out.release()
+        cv2.destroyAllWindows()
+
+    # Return the final results - note we're not using yield for the final result
+    yield last_frame, round(fps_counter, 2), round(execution_time, 4), "./output/out_yolo11n_0d3ca480-dd4a-47b2-a014-25041bce1d28.mp4"
 
 
 def _capture_screenshot() -> Image:
